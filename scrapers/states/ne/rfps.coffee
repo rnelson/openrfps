@@ -51,7 +51,7 @@ module.exports = (opts, done) ->
           
           # TODO: parse services page
           
-          # Done with commodity data; send the data or an error back
+          # Done with services data; send the data or an error back
           callback err, null if err
           callback null, services_data
   
@@ -68,7 +68,7 @@ module.exports = (opts, done) ->
           
           # TODO: parse agency page
           
-          # Done with commodity data; send the data or an error back
+          # Done with agency data; send the data or an error back
           callback err, null if err
           callback null, agency_data
   
