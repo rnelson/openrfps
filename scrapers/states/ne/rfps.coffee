@@ -37,6 +37,40 @@ module.exports = (opts, done) ->
           callback err, null if err
           callback null, commodity_data
   
+  # Parses services-rfp.html, returning an array of parsed RFPs
+  parseServicesRfpPage = (callback) ->
+    services_data = []
+    err = null
+    
+    request.post CONFIG.services_url, (err, response, body) ->
+      jsdom.env
+        html: body
+        done: (errors, window) ->
+          $ = require('jquery')(window)
+          
+          # TODO: parse services page
+          
+          # Done with commodity data; send the data or an error back
+          callback err, null if err
+          callback null, services_data
+  
+  # Parses agency-rfp.html, returning an array of parsed RFPs
+  parseAgencyRfpPage = (callback) ->
+    agency_data = []
+    err = null
+    
+    request.post CONFIG.agency_url, (err, response, body) ->
+      jsdom.env
+        html: body
+        done: (errors, window) ->
+          $ = require('jquery')(window)
+          
+          # TODO: parse agency page
+          
+          # Done with commodity data; send the data or an error back
+          callback err, null if err
+          callback null, agency_data 
+  
   
   # main() - parses all three pages at once, combines the results,
   # and sends the results back to OpenRFPs to generate the JSON
@@ -47,12 +81,12 @@ module.exports = (opts, done) ->
         callback err, data
     
     services: (callback) ->
-      callback null, null #[{services: false}]
-      return
+      parseServicesRfpPage (err, data) ->
+        callback err, data
     
     agency: (callback) ->
-      callback null, null #[{agency: false}]
-      return
+      parseAgencyRfpPage (err, data) ->
+        callback err, data
   
   , (err, results) ->
     if err
