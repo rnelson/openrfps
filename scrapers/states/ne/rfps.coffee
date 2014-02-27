@@ -31,9 +31,9 @@ module.exports = (opts, done) ->
           $('.col4full750 tr.cell-purch').each (i, _) ->
             obj = {}
             obj.id = util.trim $(@).find('.cell-purch:nth-child(3) a').text()
-            obj.responses_open_at = $(@).find('.cell-purch:nth-child(2)').text()
-            obj.title = $(@).find('.cell-purch:nth-child(1)').text()
-            obj.contact_name = $(@).find('.cell-purch:nth-child(4)').text()
+            obj.responses_open_at = util.trim $(@).find('.cell-purch:nth-child(2)').text()
+            obj.title = util.trim $(@).find('.cell-purch:nth-child(1)').text()
+            obj.contact_name = util.trim $(@).find('.cell-purch:nth-child(4)').text()
             obj.html_url = $(@).find('.cell-purch:nth-child(3) a').attr('href')
             obj.html_url = "http://das.nebraska.gov/materiel/" + obj.html_url.substr(6)
             
