@@ -43,10 +43,10 @@ module.exports = (opts, done) ->
                 done: (errors, window) ->
                   $ = require('jquery')(window)
                   
-                  obj.description = $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
+                  obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
                   
                   $('.col4full750 tr').each (i, _) ->
-                    obj.doc_title = $(@).find('td:nth-child(1)').text()
+                    obj.doc_title = util.trim $(@).find('td:nth-child(1)').text()
                     obj.downloads = new Array()
                     obj.downloads.push $(@).find('td:nth-child(3) a').attr('href')
                   
