@@ -16,22 +16,24 @@ module.exports = (opts, done) ->
     err = null
     
     request.post CONFIG['commodity_url'], (err, response, body) ->
+      obj = {}
       $ = cheerio.load body
-
-      $('.col4full750 .cell-purch .cell-purch:nth-child(3) a').each (i, el) ->
-        link = $(this).attr('href')
-        id = $(this).text()
-        link = link.substr(17)
-        link = CONFIG['bid_link_prefix'] + link
-        
-        obj = {}
-        obj['id'] = util.trim id
-        obj['html_url'] = link
-        
-        commodity_data.push obj
+      
+      # remove unnecessary bits
+      $('s, br').remove() # remove the crossed out information
+      $('p:empty, p:contains("&nbsp;")').remove() # remove unnecessary html
+      
+      # TODO: make this work
+      #$('.col4full750 .cell-purch').each (i, el) ->
+        # id, html_url
+        #obj['id'] = $(this).find('.cell-purch:nth-child(3) a').text()
+        #obj['html_url'] = CONFIG['bid_link_prefix'] + $(this).find('.cell-purch:nth-child(3) a').attr('href').substr(17)
+      
+      commodity_data.push obj
     
-      callback err, null if err
-      callback null, commodity_data
+    # Done with commodity data; send the data or an error back
+    callback err, null if err
+    callback null, commodity_data
   
   
   # main() - parses all three pages at once, combines the results,
@@ -43,11 +45,11 @@ module.exports = (opts, done) ->
         callback err, data
     
     services: (callback) ->
-      callback null, [{services: false}]
+      callback null, null #[{services: false}]
       return
     
     agency: (callback) ->
-      callback null, [{agency: false}]
+      callback null, null #[{agency: false}]
       return
   
   , (err, results) ->
@@ -56,8 +58,8 @@ module.exports = (opts, done) ->
     else
       data = []
       
-      data = data.concat(results.commodity)
-      data = data.concat(results.services)
-      data = data.concat(results.agency)
+      data = data.concat(results.commodity) if results.commodity
+      data = data.concat(results.services) if results.services
+      data = data.concat(results.agency) if results.agency
       
       done data
