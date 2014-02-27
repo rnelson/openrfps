@@ -16,27 +16,26 @@ module.exports = (opts, done) ->
     err = null
     
     request.post CONFIG.commodity_url, (err, response, body) ->
-      obj = {}
-      
       jsdom.env
         html: body
         done: (errors, window) ->
           $ = require('jquery')(window)
           
-          # remove unnecessary bits
+          # Remove unnecessary bits (TODO: these don't work, or at least $ isn't saving the result?)
           $('s, br').remove() # remove the crossed out information
           $('p:empty, p:contains("&nbsp;")').remove() # remove unnecessary html
           
-          # TODO: make this work
+          # TODO: finish this
           $('.col4full750 .cell-purch').each (i, _) ->
+            obj = {}
             obj.id = $(@).find('.cell-purch:nth-child(3) a').text()
+            
+            console.log "Added #{obj.id}".green
+            commodity_data.push obj
           
-          console.log "Added #{obj.id}".green
-          commodity_data.push obj
-  
-    # Done with commodity data; send the data or an error back
-    callback err, null if err
-    callback null, commodity_data
+          # Done with commodity data; send the data or an error back
+          callback err, null if err
+          callback null, commodity_data
   
   
   # main() - parses all three pages at once, combines the results,
