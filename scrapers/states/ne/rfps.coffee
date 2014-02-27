@@ -21,7 +21,8 @@ module.exports = (opts, done) ->
         done: (errors, window) ->
           $ = require('jquery')(window)
           
-          # Remove unnecessary bits (TODO: these don't work, or at least $ isn't saving the result?)
+          # Remove unnecessary bits (TODO: these don't work, or at
+          # least $ isn't saving the result?)
           $('s, br').remove() # remove the crossed out information
           $('p:empty, p:contains("&nbsp;")').remove() # remove unnecessary html
           
@@ -69,7 +70,7 @@ module.exports = (opts, done) ->
           
           # Done with commodity data; send the data or an error back
           callback err, null if err
-          callback null, agency_data 
+          callback null, agency_data
   
   
   # main() - parses all three pages at once, combines the results,
