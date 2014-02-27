@@ -1,5 +1,5 @@
 request = require 'request'
-cheerio = require 'cheerio'
+jsdom = require 'jsdom'
 async = require 'async'
 _ = require 'underscore'
 YAML = require 'libyaml'
@@ -15,22 +15,25 @@ module.exports = (opts, done) ->
     commodity_data = []
     err = null
     
-    request.post CONFIG['commodity_url'], (err, response, body) ->
+    request.post CONFIG.commodity_url, (err, response, body) ->
       obj = {}
-      $ = cheerio.load body
       
-      # remove unnecessary bits
-      $('s, br').remove() # remove the crossed out information
-      $('p:empty, p:contains("&nbsp;")').remove() # remove unnecessary html
-      
-      # TODO: make this work
-      #$('.col4full750 .cell-purch').each (i, el) ->
-        # id, html_url
-        #obj['id'] = $(this).find('.cell-purch:nth-child(3) a').text()
-        #obj['html_url'] = CONFIG['bid_link_prefix'] + $(this).find('.cell-purch:nth-child(3) a').attr('href').substr(17)
-      
-      commodity_data.push obj
-    
+      jsdom.env
+        html: body
+        done: (errors, window) ->
+          $ = require('jquery')(window)
+          
+          # remove unnecessary bits
+          $('s, br').remove() # remove the crossed out information
+          $('p:empty, p:contains("&nbsp;")').remove() # remove unnecessary html
+          
+          # TODO: make this work
+          $('.col4full750 .cell-purch').each (i, _) ->
+            obj.id = $(@).find('.cell-purch:nth-child(3) a').text()
+          
+          console.log "Added #{obj.id}".green
+          commodity_data.push obj
+  
     # Done with commodity data; send the data or an error back
     callback err, null if err
     callback null, commodity_data
