@@ -30,7 +30,7 @@ module.exports = (opts, done) ->
           
           $('.col4full750 tr.cell-purch').each (i, _) ->
             obj = {}
-            obj.id = $(@).find('.cell-purch:nth-child(3) a').text()
+            obj.id = util.trim $(@).find('.cell-purch:nth-child(3) a').text()
             obj.responses_open_at = $(@).find('.cell-purch:nth-child(2)').text()
             obj.title = $(@).find('.cell-purch:nth-child(1)').text()
             obj.contact_name = $(@).find('.cell-purch:nth-child(4)').text()
@@ -44,15 +44,23 @@ module.exports = (opts, done) ->
                   $ = require('jquery')(window)
                   
                   obj.description = $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
-                  console.log obj.description.blue
                   
                   $('.col4full750 tr').each (i, _) ->
                     obj.doc_title = $(@).find('td:nth-child(1)').text()
                     obj.downloads = new Array()
                     obj.downloads.push $(@).find('td:nth-child(3) a').attr('href')
                   
+                  ## If we put them here, the async nature of the GET
+                  ## results in an the push running long after the
+                  ## other code (most importantly, 'done data') is run
+                  #console.log "Added #{obj.title}".green
+                  #commodity_data.push obj
+                  
                   window.close
             
+            ## If we put them here, we get data but the data from
+            ## the second page doesn't get added
+            console.log "Added #{obj.title}".green
             commodity_data.push obj
           
           window.close
