@@ -58,7 +58,7 @@ module.exports = (opts, done) ->
                 window.close
             
             # Done scraping; add this result and move on to the next
-            console.log "Added #{obj.title}".green
+            console.log "Successfully downloaded #{obj.title}".green
             commodity_data.push obj
           
           window.close
