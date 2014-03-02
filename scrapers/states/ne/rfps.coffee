@@ -22,11 +22,10 @@ module.exports = (opts, done) ->
         done: (errors, window) ->
           $ = require('jquery')(window)
           
-          # Remove unnecessary bits (TODO: these don't work, or at
-          # least $ isn't saving the result?)
+          # Remove unnecessary bits
           $('s, br').remove() # remove the crossed out information
           $('p:empty, p:contains("&nbsp;")').remove() # remove unnecessary html
-          $('tr.cell-purch:first').contents().unwrap('tr').wrap('th')
+          $('tr.cell-purch:first').contents().unwrap('tr').wrap('th') # s/tr/th on the header rows
           
           $('.col4full750 tr.cell-purch').each (i, _) ->
             obj = {}
