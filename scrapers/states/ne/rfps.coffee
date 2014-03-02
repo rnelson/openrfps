@@ -37,7 +37,10 @@ module.exports = (opts, done) ->
             obj.html_url = $(@).find('.cell-purch:nth-child(3) a').attr('href')
             obj.html_url = "http://das.nebraska.gov/materiel/" + obj.html_url.substr(6)
             
-            details = srequest(method: 'GET', uri: obj.html_url)
+            details = srequest(
+              method: 'GET'
+              uri: obj.html_url
+            )
             jsdom.env
               html: details.body
               done: (errors, window) ->
