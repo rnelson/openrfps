@@ -48,13 +48,15 @@ module.exports = (opts, done) ->
                 $ = require('jquery')(window)
                 
                 obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
-                
+                obj.created_at = $('tr:contains("Invitation to Bid")').children('td:nth-child(2)').text()
+                obj.responses_open_at = $('tr:contains("ITB Bid Opening Date")').children('td:nth-child(2)').text()
+
                 $('tr:nth-child(3):contains("PDF")').each (i, _) ->
                   obj.downloads = new Array()
                   obj.downloads.push "http://das.nebraska.gov/materiel/purchasing/" + $(@).find('td:nth-child(3) a').attr('href')
-                
+              
                 window.close
-            
+
             # Done scraping; add this result and move on to the next
             console.log "Successfully downloaded #{obj.title}".green
             commodity_data.push obj
@@ -75,6 +77,19 @@ module.exports = (opts, done) ->
           $ = require('jquery')(window)
           
           # TODO: parse services page
+
+          # Remove unnecessary bits
+          $('s, br').remove() # remove the crossed out information
+          $('p:empty, p:contains("&nbsp;")').remove() # remove unnecessary html
+          #$('tr:first').contents().unwrap('tr').wrap('th') # s/tr/th on the header rows
+
+          $('section .col4full750:nth-child(4) tr').not('.cell-head').each (i, _) ->
+            obj = {}
+            obj.id = $(@).find('td:nth-child(5)').text()
+            obj.html_url = $(@).find('td:nth-child(5) a').attr('href')
+            obj.html_url = "http://das.nebraska.gov/materiel/" + obj.html_url.substr(6)
+            
+            services_data.push obj
           
           window.close
           callback null, services_data
