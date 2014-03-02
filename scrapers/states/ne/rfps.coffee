@@ -13,7 +13,7 @@ module.exports = (opts, done) ->
   
   # Parses commodity-itb.html, returning an array of parsed RFPs
   parseCommodityRfpPage = (callback) ->
-    commodity_data = []
+    results = []
     
     request.get CONFIG.commodity_url, (err, response, body) ->
       callback err, null if err
@@ -57,10 +57,10 @@ module.exports = (opts, done) ->
             
             # Done scraping; add this result and move on to the next
             console.log "Successfully downloaded #{obj.title}".green
-            commodity_data.push obj
+            results.push obj
           
           window.close
-          callback null, commodity_data
+          callback null, results
   
   # Parses services-rfp.html, returning an array of parsed RFPs
   parseServicesRfpPage = (callback) ->
