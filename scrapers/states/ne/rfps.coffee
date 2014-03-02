@@ -49,7 +49,6 @@ module.exports = (opts, done) ->
                 obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
                 
                 $('tr:nth-child(3):contains("PDF")').each (i, _) ->
-                  obj.doc_title = util.trim $(@).find('td:nth-child(1)').text()
                   obj.downloads = new Array()
                   obj.downloads.push "http://das.nebraska.gov/materiel/purchasing/" + $(@).find('td:nth-child(3) a').attr('href')
                 
