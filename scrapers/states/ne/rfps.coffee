@@ -42,22 +42,25 @@ module.exports = (opts, done) ->
               method: 'GET'
               uri: obj.html_url
             )
-            jsdom.env
-              html: details.body
-              done: (errors, window) ->
-                $ = require('jquery')(window)
-                
-                obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
-                obj.created_at = util.trim $('tr:contains("Invitation to Bid")').children('td:nth-child(2)').text()
-                obj.responses_open_at = util.trim $('tr:contains("ITB Bid Opening Date")').children('td:nth-child(2)').text()
-                
-                $('tr:nth-child(3):contains("PDF")').each (i, _) ->
-                  if not obj.downloads
-                    obj.downloads = new Array()
+            if 200 != details.statusCode
+              console.log "Error requesting #{obj.html_url}, status: #{details.statusCode}".red
+            else
+              jsdom.env
+                html: details.body
+                done: (errors, window) ->
+                  $ = require('jquery')(window)
                   
-                  obj.downloads.push "http://das.nebraska.gov/materiel/purchasing/" + $(@).find('td:nth-child(3) a').attr('href')
-              
-                window.close
+                  obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
+                  obj.created_at = util.trim $('tr:contains("Invitation to Bid")').children('td:nth-child(2)').text()
+                  obj.responses_open_at = util.trim $('tr:contains("ITB Bid Opening Date")').children('td:nth-child(2)').text()
+                  
+                  $('tr:nth-child(3):contains("PDF")').each (i, _) ->
+                    if not obj.downloads
+                      obj.downloads = new Array()
+                    
+                    obj.downloads.push "http://das.nebraska.gov/materiel/purchasing/" + $(@).find('td:nth-child(3) a').attr('href')
+                  
+                  window.close
 
             # Done scraping; add this result and move on to the next
             console.log "Successfully downloaded #{obj.title}".green
