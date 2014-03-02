@@ -64,7 +64,7 @@ module.exports = (opts, done) ->
   
   # Parses services-rfp.html, returning an array of parsed RFPs
   parseServicesRfpPage = (callback) ->
-    services_data = []
+    results = []
     
     request.post CONFIG.services_url, (err, response, body) ->
       callback err, null if err
@@ -77,11 +77,11 @@ module.exports = (opts, done) ->
           # TODO: parse services page
           
           window.close
-          callback null, services_data
+          callback null, results
   
   # Parses agency-rfp.html, returning an array of parsed RFPs
   parseAgencyRfpPage = (callback) ->
-    agency_data = []
+    results = []
     
     request.post CONFIG.agency_url, (err, response, body) ->
       callback err, null if err
@@ -94,7 +94,7 @@ module.exports = (opts, done) ->
           # TODO: parse agency page
           
           window.close
-          callback null, agency_data
+          callback null, results
   
   
   # main() - parses all three pages at once, combines the results,
