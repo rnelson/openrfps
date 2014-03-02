@@ -51,8 +51,10 @@ module.exports = (opts, done) ->
                 obj.created_at = $('tr:contains("Invitation to Bid")').children('td:nth-child(2)').text()
                 obj.responses_open_at = $('tr:contains("ITB Bid Opening Date")').children('td:nth-child(2)').text()
                 
-                obj.downloads = new Array()
                 $('tr:nth-child(3):contains("PDF")').each (i, _) ->
+                  if not obj.downloads
+                    obj.downloads = new Array()
+                  
                   obj.downloads.push "http://das.nebraska.gov/materiel/purchasing/" + $(@).find('td:nth-child(3) a').attr('href')
               
                 window.close
