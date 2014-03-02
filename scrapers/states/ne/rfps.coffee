@@ -1,4 +1,5 @@
 request = require 'request'
+srequest = require 'request-sync'
 jsdom = require 'jsdom'
 async = require 'async'
 _ = require 'underscore'
@@ -36,29 +37,25 @@ module.exports = (opts, done) ->
             obj.html_url = $(@).find('.cell-purch:nth-child(3) a').attr('href')
             obj.html_url = "http://das.nebraska.gov/materiel/" + obj.html_url.substr(6)
             
-            request.get obj.html_url, (err, response, body) ->
-              jsdom.env
-                html: body
-                done: (errors, window) ->
-                  $ = require('jquery')(window)
-                  
-                  obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
-                  
-                  $('.col4full750 tr').each (i, _) ->
-                    obj.doc_title = util.trim $(@).find('td:nth-child(1)').text()
-                    obj.downloads = new Array()
-                    obj.downloads.push $(@).find('td:nth-child(3) a').attr('href')
-                  
-                  ## If we put them here, the async nature of the GET
-                  ## results in an the push running long after the
-                  ## other code (most importantly, 'done data') is run
-                  #console.log "Added #{obj.title}".green
-                  #commodity_data.push obj
-                  
-                  window.close
+            details = srequest(
+              method: 'GET'
+              uri: obj.html_url
+            )
+            jsdom.env
+              html: details.body
+              done: (errors, window) ->
+                $ = require('jquery')(window)
+                
+                obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
+                
+                $('.col4full750 tr').each (i, _) ->
+                  obj.doc_title = util.trim $(@).find('td:nth-child(1)').text()
+                  obj.downloads = new Array()
+                  obj.downloads.push $(@).find('td:nth-child(3) a').attr('href')
+                
+                window.close
             
-            ## If we put them here, we get data but the data from
-            ## the second page doesn't get added
+            # Done scraping; add this result and move on to the next
             console.log "Added #{obj.title}".green
             commodity_data.push obj
           
