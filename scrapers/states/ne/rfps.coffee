@@ -48,8 +48,8 @@ module.exports = (opts, done) ->
                 $ = require('jquery')(window)
                 
                 obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
-                obj.created_at = $('tr:contains("Invitation to Bid")').children('td:nth-child(2)').text()
-                obj.responses_open_at = $('tr:contains("ITB Bid Opening Date")').children('td:nth-child(2)').text()
+                obj.created_at = util.trim $('tr:contains("Invitation to Bid")').children('td:nth-child(2)').text()
+                obj.responses_open_at = util.trim $('tr:contains("ITB Bid Opening Date")').children('td:nth-child(2)').text()
                 
                 $('tr:nth-child(3):contains("PDF")').each (i, _) ->
                   if not obj.downloads
@@ -87,7 +87,7 @@ module.exports = (opts, done) ->
 
           $('section .col4full750:nth-child(4) tr').not('.cell-head').each (i, _) ->
             obj = {}
-            obj.id = $(@).find('td:nth-child(5)').text()
+            obj.id = util.trim $(@).find('td:nth-child(5)').text()
             obj.html_url = $(@).find('td:nth-child(5) a').attr('href')
             obj.html_url = "http://das.nebraska.gov/materiel/" + obj.html_url.substr(6)
             
