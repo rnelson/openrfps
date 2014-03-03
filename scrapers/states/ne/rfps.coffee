@@ -58,7 +58,7 @@ module.exports = (opts, done) ->
                     if not obj.downloads
                       obj.downloads = new Array()
                     
-                    obj.downloads.push "http://das.nebraska.gov/materiel/purchasing/" + $(@).find('td:nth-child(3) a').attr('href')
+                    obj.downloads.push CONFIG.bid_link_prefix + $(@).find('td:nth-child(3) a').attr('href')
                   
                   window.close
 
@@ -84,16 +84,89 @@ module.exports = (opts, done) ->
           # Remove unnecessary bits
           $('s, br').remove() # remove the crossed out information
           $('p:empty, p:contains("&nbsp;")').remove() # remove unnecessary html
-
-          $('section .col4full750:nth-child(4) tr').not('.cell-head').each (i, _) ->
+          
+          # "State Purchasing Processed Current Bid Opportunities"
+          $('.col4full750:first tr.cell-purch').each (i, _) ->
             obj = {}
-            obj.id = util.trim $(@).find('td:nth-child(5)').text()
-            obj.html_url = $(@).find('td:nth-child(5) a').attr('href')
-            obj.html_url = "http://das.nebraska.gov/materiel/" + obj.html_url.substr(6)
-            obj.title = util.trim $(@).find('td:nth-child(1)').text()
-            obj.contact_name = util.trim $(@).find('td:nth-child(6)').text()
+            obj.id = util.trim $(@).find('.cell-purch:nth-child(4) a').text()
+            obj.responses_open_at = util.trim $(@).find('.cell-purch:nth-child(2)').text()
+            obj.updated_at= util.trim $(@).find('.cell-purch:nth-child(3)').text()
+            obj.title = util.trim $(@).find('.cell-purch:nth-child(1)').text()
+            obj.contact_name = util.trim $(@).find('.cell-purch:nth-child(5)').text()
+            obj.html_url = CONFIG.bid_link_prefix + $(@).find('.cell-purch:nth-child(4) a').attr('href').substr(17)
             
-            results.push obj
+            details = srequest(
+              method: 'GET'
+              uri: obj.html_url
+            )
+            if 200 != details.statusCode
+              console.log "Error requesting #{obj.html_url}, status: #{details.statusCode}".red
+            else
+              jsdom.env
+                html: details.body
+                done: (errors, window) ->
+                  $ = require('jquery')(window)
+                  
+                  obj.description = util.trim $('b:contains("PROJECT DESCRIPTION")').next('span').text()
+                  obj.created_at = util.trim $('td:contains("Request for Proposal")').next('td').text()
+                  
+                  download_root = CONFIG.bid_link_prefix + obj.id.split(' ').join('') + '/'
+                  $('td a:contains("PDF")').each (i, _) ->
+                    if not obj.downloads
+                      obj.downloads = new Array()
+                    obj.downloads.push download_root + $(@).attr('href')
+                  $('td a:contains("Word")').each (i, _) ->
+                    if not obj.downloads
+                      obj.downloads = new Array()
+                    obj.downloads.push download_root + $(@).attr('href')
+                  
+                  # Done scraping; add this result and move on to the next
+                  results.push obj
+                  console.log "Successfully downloaded #{obj.title}".green
+                  
+                  window.close
+          
+          # "State Purchasing Processed Proposals that have Opened"
+          $('.col4full750:eq(1) tr.cell-purch').each (i, _) ->
+            obj = {}
+            obj.awarded = true
+            obj.id = util.trim $(@).find('.cell-purch:nth-child(5)').text()
+            obj.updated_at= util.trim $(@).find('.cell-purch:nth-child(4)').text()
+            obj.title = util.trim $(@).find('.cell-purch:nth-child(1)').text()
+            obj.contact_name = util.trim $(@).find('.cell-purch:nth-child(6)').text()
+            obj.html_url = CONFIG.bid_link_prefix + $(@).find('a').attr('href').substr(17)
+            
+            details = srequest(
+              method: 'GET'
+              uri: obj.html_url
+            )
+            if 200 != details.statusCode
+              console.log "Error requesting #{obj.html_url}, status: #{details.statusCode}".red
+            else
+              jsdom.env
+                html: details.body
+                done: (errors, window) ->
+                  $ = require('jquery')(window)
+                  
+                  obj.description = util.trim $('b:contains("PROJECT DESCRIPTION")').next('span').text()
+                  obj.created_at = util.trim $('td:contains("Request for Proposal")').next('td').text()
+                  
+                  download_root = CONFIG.bid_link_prefix + obj.id.split(' ').join('') + '/'
+                  $('td a:contains("PDF")').each (i, _) ->
+                    if not obj.downloads
+                      obj.downloads = new Array()
+                    obj.downloads.push download_root + $(@).attr('href')
+                  $('td a:contains("Word")').each (i, _) ->
+                    if not obj.downloads
+                      obj.downloads = new Array()
+                    obj.downloads.push download_root + $(@).attr('href')
+                  
+                  # Done scraping; add this result and move on to the next
+                  results.push obj
+                  console.log "Successfully downloaded #{obj.title}".green
+                  console.log obj
+                  
+                  window.close
           
           window.close
           callback null, results
