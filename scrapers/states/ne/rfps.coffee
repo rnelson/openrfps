@@ -278,17 +278,17 @@ module.exports = (opts, done) ->
   # and sends the results back to OpenRFPs to generate the JSON
   # output file
   async.parallel
-    commodity: (callback) ->
-      parseCommodityRfpPage (err, data) ->
-        callback err, data
+    # commodity: (callback) ->
+    #   parseCommodityRfpPage (err, data) ->
+    #     callback err, data
     
     services: (callback) ->
       parseServicesRfpPage (err, data) ->
         callback err, data
     
-    agency: (callback) ->
-      parseAgencyRfpPage (err, data) ->
-        callback err, data
+    # agency: (callback) ->
+    #   parseAgencyRfpPage (err, data) ->
+    #     callback err, data
   
   , (err, results) ->
     if err
