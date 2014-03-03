@@ -1,5 +1,4 @@
 request = require 'request'
-srequest = require 'request-sync'
 jsdom = require 'jsdom'
 async = require 'async'
 _ = require 'underscore'
@@ -136,7 +135,7 @@ module.exports = (opts, done) ->
             obj.contact_name = util.trim $(@).find('.cell-purch:nth-child(6)').text()
             obj.html_url = CONFIG.bid_link_prefix + $(@).find('a').attr('href').substr(17)
             
-            details = srequest(
+            details = require('request-sync')(
               method: 'GET'
               uri: obj.html_url
             )
@@ -196,7 +195,7 @@ module.exports = (opts, done) ->
             obj.department_name = util.trim $(@).find('.cell-purch:nth-child(5)').text()
             obj.html_url = CONFIG.bid_link_prefix + $(@).find('.cell-purch:nth-child(4) a').attr('href').substr(17)
             
-            details = srequest(
+            details = require('request-sync')(
               method: 'GET'
               uri: obj.html_url
             )
