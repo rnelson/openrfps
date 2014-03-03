@@ -41,25 +41,22 @@ module.exports = (opts, done) ->
               method: 'GET'
               uri: obj.html_url
             )
-            if 200 != details.statusCode
-              console.log "Error requesting #{obj.html_url}, status: #{details.statusCode}".red
-            else
-              jsdom.env
-                html: details.body
-                done: (errors, window) ->
-                  $ = require('jquery')(window)
+            jsdom.env
+              html: details.body
+              done: (errors, window) ->
+                $ = require('jquery')(window)
+                
+                obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
+                obj.created_at = util.trim $('tr:contains("Invitation to Bid")').children('td:nth-child(2)').text()
+                obj.responses_open_at = util.trim $('tr:contains("ITB Bid Opening Date")').children('td:nth-child(2)').text()
+                
+                $('tr:nth-child(3):contains("PDF")').each (i, _) ->
+                  if not obj.downloads
+                    obj.downloads = new Array()
                   
-                  obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
-                  obj.created_at = util.trim $('tr:contains("Invitation to Bid")').children('td:nth-child(2)').text()
-                  obj.responses_open_at = util.trim $('tr:contains("ITB Bid Opening Date")').children('td:nth-child(2)').text()
-                  
-                  $('tr:nth-child(3):contains("PDF")').each (i, _) ->
-                    if not obj.downloads
-                      obj.downloads = new Array()
-                    
-                    obj.downloads.push CONFIG.bid_link_prefix + $(@).find('td:nth-child(3) a').attr('href')
-                  
-                  window.close
+                  obj.downloads.push CONFIG.bid_link_prefix + $(@).find('td:nth-child(3) a').attr('href')
+                
+                window.close
             
             # Done scraping; add this result and move on to the next
             console.log "Successfully downloaded #{obj.title}".green
@@ -98,32 +95,29 @@ module.exports = (opts, done) ->
               method: 'GET'
               uri: obj.html_url
             )
-            if 200 != details.statusCode
-              console.log "Error requesting #{obj.html_url}, status: #{details.statusCode}".red
-            else
-              jsdom.env
-                html: details.body
-                done: (errors, window) ->
-                  $ = require('jquery')(window)
-                  
-                  obj.description = util.trim $('b:contains("PROJECT DESCRIPTION")').next('span').text()
-                  obj.created_at = util.trim $('td:contains("Request for Proposal")').next('td').text()
-                  
-                  download_root = CONFIG.bid_link_prefix + obj.id.split(' ').join('') + '/'
-                  $('td a:contains("PDF")').each (i, _) ->
-                    if not obj.downloads
-                      obj.downloads = new Array()
-                    obj.downloads.push download_root + $(@).attr('href')
-                  $('td a:contains("Word")').each (i, _) ->
-                    if not obj.downloads
-                      obj.downloads = new Array()
-                    obj.downloads.push download_root + $(@).attr('href')
-                  
-                  # Done scraping; add this result and move on to the next
-                  results.push obj
-                  console.log "Successfully downloaded #{obj.title}".green
-                  
-                  window.close
+            jsdom.env
+              html: details.body
+              done: (errors, window) ->
+                $ = require('jquery')(window)
+                
+                obj.description = util.trim $('b:contains("PROJECT DESCRIPTION")').next('span').text()
+                obj.created_at = util.trim $('td:contains("Request for Proposal")').next('td').text()
+                
+                download_root = CONFIG.bid_link_prefix + obj.id.split(' ').join('') + '/'
+                $('td a:contains("PDF")').each (i, _) ->
+                  if not obj.downloads
+                    obj.downloads = new Array()
+                  obj.downloads.push download_root + $(@).attr('href')
+                $('td a:contains("Word")').each (i, _) ->
+                  if not obj.downloads
+                    obj.downloads = new Array()
+                  obj.downloads.push download_root + $(@).attr('href')
+                
+                # Done scraping; add this result and move on to the next
+                results.push obj
+                console.log "Successfully downloaded #{obj.title}".green
+                
+                window.close
           
           # "State Purchasing Processed Proposals that have Opened"
           $('.col4full750:eq(1) tr.cell-purch').each (i, _) ->
@@ -139,32 +133,29 @@ module.exports = (opts, done) ->
               method: 'GET'
               uri: obj.html_url
             )
-            if 200 != details.statusCode
-              console.log "Error requesting #{obj.html_url}, status: #{details.statusCode}".red
-            else
-              jsdom.env
-                html: details.body
-                done: (errors, window) ->
-                  $ = require('jquery')(window)
-                  
-                  obj.description = util.trim $('b:contains("PROJECT DESCRIPTION")').next('span').text()
-                  obj.created_at = util.trim $('td:contains("Request for Proposal")').next('td').text()
-                  
-                  download_root = CONFIG.bid_link_prefix + obj.id.split(' ').join('') + '/'
-                  $('td a:contains("PDF")').each (i, _) ->
-                    if not obj.downloads
-                      obj.downloads = new Array()
-                    obj.downloads.push download_root + $(@).attr('href')
-                  $('td a:contains("Word")').each (i, _) ->
-                    if not obj.downloads
-                      obj.downloads = new Array()
-                    obj.downloads.push download_root + $(@).attr('href')
-                  
-                  # Done scraping; add this result and move on to the next
-                  results.push obj
-                  console.log "Successfully downloaded #{obj.title}".green
-                  
-                  window.close
+            jsdom.env
+              html: details.body
+              done: (errors, window) ->
+                $ = require('jquery')(window)
+                
+                obj.description = util.trim $('b:contains("PROJECT DESCRIPTION")').next('span').text()
+                obj.created_at = util.trim $('td:contains("Request for Proposal")').next('td').text()
+                
+                download_root = CONFIG.bid_link_prefix + obj.id.split(' ').join('') + '/'
+                $('td a:contains("PDF")').each (i, _) ->
+                  if not obj.downloads
+                    obj.downloads = new Array()
+                  obj.downloads.push download_root + $(@).attr('href')
+                $('td a:contains("Word")').each (i, _) ->
+                  if not obj.downloads
+                    obj.downloads = new Array()
+                  obj.downloads.push download_root + $(@).attr('href')
+                
+                # Done scraping; add this result and move on to the next
+                results.push obj
+                console.log "Successfully downloaded #{obj.title}".green
+                
+                window.close
           
           window.close
           callback null, results
@@ -199,44 +190,41 @@ module.exports = (opts, done) ->
               method: 'GET'
               uri: obj.html_url
             )
-            if 200 != details.statusCode
-              console.log "Error requesting #{obj.html_url}, status: #{details.statusCode}".red
-            else
-              jsdom.env
-                html: details.body
-                done: (errors, window) ->
-                  $ = require('jquery')(window)
-                  
-                  obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
-                  obj.contact_name = util.trim $('h6:contains("BUYER")').next('p').text()
-                  obj.created_at = util.trim $('tr:contains("Request for Proposal")').children('td:nth-child(2)').text()
-                  
-                  download_root = CONFIG.bid_link_prefix + obj.id.split(' ').join('') + '/'
-                  $('tr:nth-child(3) p a').each (i, _) ->
-                    if not obj.downloads
-                      obj.downloads = new Array()
-                    obj.downloads.push download_root + $(@).attr('href')
-                  
-                  # These dates aren't always filled in, so only add them if a real date is listed
-                  open_date = util.trim $('tr:contains("Evaluation Period")').children('td:nth-child(2)').text()
-                  if not 'XX/XX/XX' == open_date
-                    obj.responses_open_at = open_date
-                  
-                  due_date = util.trim $('tr:contains("Best and Final Offer")').children('td:nth-child(2)').text()
-                  if not 'XX/XX/XX' == due_date
-                    obj.responses_due_at = due_date
-                  
-                  duration = util.trim $('tr:contains("Effective"):contains("through")').children('td:first').text()
-                  duration = duration.substr(duration.indexOf('Effective') + 10)
-                  if duration.indexOf('XXXX') < 0
-                    obj.duration = duration
-                  
-                  # Done scraping; add this result and move on to the next
-                  results.push obj
-                  console.log "Successfully downloaded #{obj.title}".green
-                  console.log obj
-                  
-                  window.close
+            jsdom.env
+              html: details.body
+              done: (errors, window) ->
+                $ = require('jquery')(window)
+                
+                obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
+                obj.contact_name = util.trim $('h6:contains("BUYER")').next('p').text()
+                obj.created_at = util.trim $('tr:contains("Request for Proposal")').children('td:nth-child(2)').text()
+                
+                download_root = CONFIG.bid_link_prefix + obj.id.split(' ').join('') + '/'
+                $('tr:nth-child(3) p a').each (i, _) ->
+                  if not obj.downloads
+                    obj.downloads = new Array()
+                  obj.downloads.push download_root + $(@).attr('href')
+                
+                # These dates aren't always filled in, so only add them if a real date is listed
+                open_date = util.trim $('tr:contains("Evaluation Period")').children('td:nth-child(2)').text()
+                if not 'XX/XX/XX' == open_date
+                  obj.responses_open_at = open_date
+                
+                due_date = util.trim $('tr:contains("Best and Final Offer")').children('td:nth-child(2)').text()
+                if not 'XX/XX/XX' == due_date
+                  obj.responses_due_at = due_date
+                
+                duration = util.trim $('tr:contains("Effective"):contains("through")').children('td:first').text()
+                duration = duration.substr(duration.indexOf('Effective') + 10)
+                if duration.indexOf('XXXX') < 0
+                  obj.duration = duration
+                
+                # Done scraping; add this result and move on to the next
+                results.push obj
+                console.log "Successfully downloaded #{obj.title}".green
+                console.log obj
+                
+                window.close
           
           # "Agency Processed Proposals that have Opened"
           $('.col4full750:eq(1) tr.cell-purch').each (i, _) ->
