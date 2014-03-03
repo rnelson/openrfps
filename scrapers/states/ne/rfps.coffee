@@ -164,7 +164,6 @@ module.exports = (opts, done) ->
                   # Done scraping; add this result and move on to the next
                   results.push obj
                   console.log "Successfully downloaded #{obj.title}".green
-                  console.log obj
                   
                   window.close
           
