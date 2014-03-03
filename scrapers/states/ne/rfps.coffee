@@ -37,7 +37,7 @@ module.exports = (opts, done) ->
             obj.html_url = $(@).find('.cell-purch:nth-child(3) a').attr('href')
             obj.html_url = "http://das.nebraska.gov/materiel/" + obj.html_url.substr(6)
             
-            details = srequest(
+            details = require('request-sync')(
               method: 'GET'
               uri: obj.html_url
             )
@@ -60,7 +60,7 @@ module.exports = (opts, done) ->
                     obj.downloads.push CONFIG.bid_link_prefix + $(@).find('td:nth-child(3) a').attr('href')
                   
                   window.close
-
+            
             # Done scraping; add this result and move on to the next
             console.log "Successfully downloaded #{obj.title}".green
             results.push obj
