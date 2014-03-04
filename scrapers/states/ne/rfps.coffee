@@ -75,87 +75,77 @@ module.exports = (opts, done) ->
       jsdom.env
         html: body
         done: (errors, window) ->
-          $ = require('jquery')(window)
+          jQuery = require('jquery')(window)
           
           # Remove unnecessary bits
-          $('s, br').remove() # remove the crossed out information
-          $('p:empty, p:contains("&nbsp;")').remove() # remove unnecessary html
+          jQuery('s, br').remove() # remove the crossed out information
+          jQuery('p:empty, p:contains("&nbsp;")').remove() # remove unnecessary html
           
           # "State Purchasing Processed Current Bid Opportunities"
-          $('.col4full750:first tr.cell-purch').each (i, _) ->
+          jQuery('.col4full750:first tr.cell-purch').each (i, _) ->
             obj = {}
-            obj.id = util.trim $(@).find('.cell-purch:nth-child(4) a').text()
-            obj.responses_open_at = util.trim $(@).find('.cell-purch:nth-child(2)').text()
-            obj.updated_at= util.trim $(@).find('.cell-purch:nth-child(3)').text()
-            obj.title = util.trim $(@).find('.cell-purch:nth-child(1)').text()
-            obj.contact_name = util.trim $(@).find('.cell-purch:nth-child(5)').text()
-            obj.html_url = CONFIG.bid_link_prefix + $(@).find('.cell-purch:nth-child(4) a').attr('href').substr(17)
-            
-            details = srequest(
-              method: 'GET'
-              uri: obj.html_url
-            )
-            jsdom.env
-              html: details.body
-              done: (errors, window) ->
-                $ = require('jquery')(window)
-                
-                obj.description = util.trim $('b:contains("PROJECT DESCRIPTION")').next('span').text()
-                obj.created_at = util.trim $('td:contains("Request for Proposal")').next('td').text()
-                
-                download_root = CONFIG.bid_link_prefix + obj.id.split(' ').join('') + '/'
-                $('td a:contains("PDF")').each (i, _) ->
-                  if not obj.downloads
-                    obj.downloads = new Array()
-                  obj.downloads.push download_root + $(@).attr('href')
-                $('td a:contains("Word")').each (i, _) ->
-                  if not obj.downloads
-                    obj.downloads = new Array()
-                  obj.downloads.push download_root + $(@).attr('href')
-                
-                # Done scraping; add this result and move on to the next
-                results.push obj
-                console.log "Successfully downloaded #{obj.title}".green
-                
-                window.close
-          
-          # "State Purchasing Processed Proposals that have Opened"
-          $('.col4full750:eq(1) tr.cell-purch').each (i, _) ->
-            obj = {}
-            obj.awarded = true
-            obj.id = util.trim $(@).find('.cell-purch:nth-child(5)').text()
-            obj.updated_at= util.trim $(@).find('.cell-purch:nth-child(4)').text()
-            obj.title = util.trim $(@).find('.cell-purch:nth-child(1)').text()
-            obj.contact_name = util.trim $(@).find('.cell-purch:nth-child(6)').text()
-            obj.html_url = CONFIG.bid_link_prefix + $(@).find('a').attr('href').substr(17)
+            obj.id = util.trim jQuery(@).find('.cell-purch:nth-child(4) a').text()
+            obj.responses_open_at = util.trim jQuery(@).find('.cell-purch:nth-child(2)').text()
+            obj.updated_at= util.trim jQuery(@).find('.cell-purch:nth-child(3)').text()
+            obj.title = util.trim jQuery(@).find('.cell-purch:nth-child(1)').text()
+            obj.contact_name = util.trim jQuery(@).find('.cell-purch:nth-child(5)').text()
+            obj.html_url = CONFIG.bid_link_prefix + jQuery(@).find('.cell-purch:nth-child(4) a').attr('href').substr(17)
             
             details = require('request-sync')(
               method: 'GET'
               uri: obj.html_url
             )
-            jsdom.env
-              html: details.body
-              done: (errors, window) ->
-                $ = require('jquery')(window)
-                
-                obj.description = util.trim $('b:contains("PROJECT DESCRIPTION")').next('span').text()
-                obj.created_at = util.trim $('td:contains("Request for Proposal")').next('td').text()
-                
-                download_root = CONFIG.bid_link_prefix + obj.id.split(' ').join('') + '/'
-                $('td a:contains("PDF")').each (i, _) ->
-                  if not obj.downloads
-                    obj.downloads = new Array()
-                  obj.downloads.push download_root + $(@).attr('href')
-                $('td a:contains("Word")').each (i, _) ->
-                  if not obj.downloads
-                    obj.downloads = new Array()
-                  obj.downloads.push download_root + $(@).attr('href')
-                
-                # Done scraping; add this result and move on to the next
-                results.push obj
-                console.log "Successfully downloaded #{obj.title}".green
-                
-                window.close
+            $ = require('cheerio').load(details.body)
+            
+            obj.description = util.trim $('b:contains("PROJECT DESCRIPTION")').next('span').text()
+            obj.created_at = util.trim $('td:contains("Request for Proposal")').next('td').text()
+            
+            download_root = CONFIG.bid_link_prefix + obj.id.split(' ').join('') + '/'
+            $('td a:contains("PDF")').each (i, _) ->
+              if not obj.downloads
+                obj.downloads = new Array()
+              obj.downloads.push download_root + $(@).attr('href')
+            $('td a:contains("Word")').each (i, _) ->
+              if not obj.downloads
+                obj.downloads = new Array()
+              obj.downloads.push download_root + $(@).attr('href')
+            
+            # Done scraping; add this result and move on to the next
+            results.push obj
+            console.log "Successfully downloaded #{obj.title}".green
+          
+          # "State Purchasing Processed Proposals that have Opened"
+          jQuery('.col4full750:eq(1) tr.cell-purch').each (i, _) ->
+            obj = {}
+            obj.awarded = true
+            obj.id = util.trim jQuery(@).find('.cell-purch:nth-child(5)').text()
+            obj.updated_at= util.trim jQuery(@).find('.cell-purch:nth-child(4)').text()
+            obj.title = util.trim jQuery(@).find('.cell-purch:nth-child(1)').text()
+            obj.contact_name = util.trim jQuery(@).find('.cell-purch:nth-child(6)').text()
+            obj.html_url = CONFIG.bid_link_prefix + jQuery(@).find('a').attr('href').substr(17)
+            
+            details = require('request-sync')(
+              method: 'GET'
+              uri: obj.html_url
+            )
+            $ = require('cheerio').load(details.body)
+            
+            obj.description = util.trim $('b:contains("PROJECT DESCRIPTION")').next('span').text()
+            obj.created_at = util.trim $('td:contains("Request for Proposal")').next('td').text()
+            
+            download_root = CONFIG.bid_link_prefix + obj.id.split(' ').join('') + '/'
+            $('td a:contains("PDF")').each (i, _) ->
+              if not obj.downloads
+                obj.downloads = new Array()
+              obj.downloads.push download_root + $(@).attr('href')
+            $('td a:contains("Word")').each (i, _) ->
+              if not obj.downloads
+                obj.downloads = new Array()
+              obj.downloads.push download_root + $(@).attr('href')
+            
+            # Done scraping; add this result and move on to the next
+            results.push obj
+            console.log "Successfully downloaded #{obj.title}".green
           
           window.close
           callback null, results
@@ -170,84 +160,78 @@ module.exports = (opts, done) ->
       jsdom.env
         html: body
         done: (errors, window) ->
-          $ = require('jquery')(window)
+          jQuery = require('jquery')(window)
           
           # Remove unnecessary bits
-          $('br').remove() # remove the crossed out information
-          $('p:empty, p:contains("&nbsp;")').remove() # remove unnecessary html
+          jQuery('br').remove() # remove the crossed out information
+          jQuery('p:empty, p:contains("&nbsp;")').remove() # remove unnecessary html
           
           # "Agency Processed Current Bid Opportunities"
-          $('.col4full750:first tr.cell-purch').each (i, _) ->
+          jQuery('.col4full750:first tr.cell-purch').each (i, _) ->
             obj = {}
-            obj.id = util.trim $(@).find('.cell-purch:nth-child(4) a').text()
-            obj.responses_open_at = util.trim $(@).find('.cell-purch:nth-child(2)').text()
-            obj.updated_at= util.trim $(@).find('.cell-purch:nth-child(3)').text()
-            obj.title = util.trim $(@).find('.cell-purch:nth-child(1)').text()
-            obj.department_name = util.trim $(@).find('.cell-purch:nth-child(5)').text()
-            obj.html_url = CONFIG.bid_link_prefix + $(@).find('.cell-purch:nth-child(4) a').attr('href').substr(17)
+            obj.id = util.trim jQuery(@).find('.cell-purch:nth-child(4) a').text()
+            obj.responses_open_at = util.trim jQuery(@).find('.cell-purch:nth-child(2)').text()
+            obj.updated_at= util.trim jQuery(@).find('.cell-purch:nth-child(3)').text()
+            obj.title = util.trim jQuery(@).find('.cell-purch:nth-child(1)').text()
+            obj.department_name = util.trim jQuery(@).find('.cell-purch:nth-child(5)').text()
+            obj.html_url = CONFIG.bid_link_prefix + jQuery(@).find('.cell-purch:nth-child(4) a').attr('href').substr(17)
             
             details = require('request-sync')(
               method: 'GET'
               uri: obj.html_url
             )
-            jsdom.env
-              html: details.body
-              done: (errors, window) ->
-                $ = require('jquery')(window)
-                
-                obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
-                obj.contact_name = util.trim $('h6:contains("BUYER")').next('p').text()
-                obj.created_at = util.trim $('tr:contains("Request for Proposal")').children('td:nth-child(2)').text()
-                
-                download_root = CONFIG.bid_link_prefix + obj.id.split(' ').join('') + '/'
-                $('tr:nth-child(3) p a').each (i, _) ->
-                  if not obj.downloads
-                    obj.downloads = new Array()
-                  obj.downloads.push download_root + $(@).attr('href')
-                
-                # These dates aren't always filled in, so only add them if a real date is listed
-                open_date = util.trim $('tr:contains("Evaluation Period")').children('td:nth-child(2)').text()
-                if not 'XX/XX/XX' == open_date
-                  obj.responses_open_at = open_date
-                
-                due_date = util.trim $('tr:contains("Best and Final Offer")').children('td:nth-child(2)').text()
-                if not 'XX/XX/XX' == due_date
-                  obj.responses_due_at = due_date
-                
-                duration = util.trim $('tr:contains("Effective"):contains("through")').children('td:first').text()
-                duration = duration.substr(duration.indexOf('Effective') + 10)
-                if duration.indexOf('XXXX') < 0
-                  obj.duration = duration
-                
-                # Done scraping; add this result and move on to the next
-                results.push obj
-                console.log "Successfully downloaded #{obj.title}".green
-                console.log obj
-                
-                window.close
+            $ = require('cheerio').load(details.body)
+            
+            obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
+            obj.contact_name = util.trim $('h6:contains("BUYER")').next('p').text()
+            obj.created_at = util.trim $('tr:contains("Request for Proposal")').children('td:nth-child(2)').text()
+            
+            download_root = CONFIG.bid_link_prefix + obj.id.split(' ').join('') + '/'
+            $('tr:nth-child(3) p a').each (i, _) ->
+              if not obj.downloads
+                obj.downloads = new Array()
+              obj.downloads.push download_root + $(@).attr('href')
+            
+            # These dates aren't always filled in, so only add them if a real date is listed
+            open_date = util.trim $('tr:contains("Evaluation Period")').children('td:nth-child(2)').text()
+            if not 'XX/XX/XX' == open_date
+              obj.responses_open_at = open_date
+            
+            due_date = util.trim $('tr:contains("Best and Final Offer")').children('td:nth-child(2)').text()
+            if not 'XX/XX/XX' == due_date
+              obj.responses_due_at = due_date
+            
+            duration = util.trim $('tr:contains("Effective"):contains("through") td:nth-child(1)').text()
+            duration = duration.substr(duration.indexOf('Effective') + 10)
+            if duration.indexOf('XXXX') < 0
+              obj.duration = duration
+            
+            # Done scraping; add this result and move on to the next
+            results.push obj
+            console.log "Successfully downloaded #{obj.title}".green
           
           # "Agency Processed Proposals that have Opened"
-          $('.col4full750:eq(1) tr.cell-purch').each (i, _) ->
+          jQuery('.col4full750:eq(1) tr.cell-purch').each (i, _) ->
             obj = {}
             obj.awarded = true
-            obj.id = util.trim $(@).find('.cell-purch:nth-child(5)').text()
-            obj.updated_at= util.trim $(@).find('.cell-purch:nth-child(4)').text()
-            obj.title = util.trim $(@).find('.cell-purch:nth-child(1)').text()
-            obj.department_name = util.trim $(@).find('.cell-purch:nth-child(6)').text()
+            obj.id = util.trim jQuery(@).find('.cell-purch:nth-child(5)').text()
+            obj.updated_at= util.trim jQuery(@).find('.cell-purch:nth-child(4)').text()
+            obj.title = util.trim jQuery(@).find('.cell-purch:nth-child(1)').text()
+            obj.department_name = util.trim jQuery(@).find('.cell-purch:nth-child(6)').text()
             
             # Done scraping; add this result and move on to the next
             results.push obj
             console.log "Successfully downloaded #{obj.title}".green
           
           # "Request for Information - Agency Processed"
-          $('.col4full750:eq(2) tr.cell-purch').each (i, _) ->
+          jQuery('.col4full750:eq(2) tr.cell-purch').each (i, _) ->
             obj = {}
-            obj.id = util.trim $(@).find('.cell-purch:nth-child(4)').text()
-            obj.updated_at= util.trim $(@).find('.cell-purch:nth-child(3)').text()
-            obj.title = util.trim $(@).find('.cell-purch:nth-child(1)').text()
-            obj.department_name = util.trim $(@).find('.cell-purch:nth-child(5)').text()
+            obj.id = util.trim jQuery(@).find('.cell-purch:nth-child(4)').text()
+            obj.updated_at= util.trim jQuery(@).find('.cell-purch:nth-child(3)').text()
+            obj.title = util.trim jQuery(@).find('.cell-purch:nth-child(1)').text()
+            obj.department_name = util.trim jQuery(@).find('.cell-purch:nth-child(5)').text()
             
-            obj.created_at = util.trim $(@).find('.cell-purch:nth-child(2)').text()
+            obj.created_at = util.trim jQuery(@).find('.cell-purch:nth-child(2)').text()
             if obj.created_at.indexOf('Withdrawn')
               obj.canceled = true
               obj.created_at = obj.created_at.substr(0, 8)
@@ -258,6 +242,7 @@ module.exports = (opts, done) ->
           
           window.close
           callback null, results
+  
   
   
   # main() - parses all three pages at once, combines the results,
