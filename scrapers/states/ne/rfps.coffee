@@ -1,5 +1,8 @@
 request = require 'request'
+requestsync = require 'request-sync'
+cheerio = require 'cheerio'
 jsdom = require 'jsdom'
+jq = require 'jquery'
 async = require 'async'
 _ = require 'underscore'
 YAML = require 'libyaml'
@@ -20,7 +23,7 @@ module.exports = (opts, done) ->
       jsdom.env
         html: body
         done: (errors, window) ->
-          $ = require('jquery')(window)
+          $ = jq(window)
           
           # Remove unnecessary bits
           $('s, br').remove() # remove the crossed out information
@@ -37,14 +40,14 @@ module.exports = (opts, done) ->
             obj.html_url = $(@).find('.cell-purch:nth-child(3) a').attr('href')
             obj.html_url = "http://das.nebraska.gov/materiel/" + obj.html_url.substr(6)
             
-            details = require('request-sync')(
+            details = requestsync(
               method: 'GET'
               uri: obj.html_url
             )
             jsdom.env
               html: details.body
               done: (errors, window) ->
-                $ = require('jquery')(window)
+                $ = jq(window)
                 
                 obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
                 obj.created_at = util.trim $('tr:contains("Invitation to Bid")').children('td:nth-child(2)').text()
@@ -75,7 +78,7 @@ module.exports = (opts, done) ->
       jsdom.env
         html: body
         done: (errors, window) ->
-          jQuery = require('jquery')(window)
+          jQuery = jq(window)
           
           # Remove unnecessary bits
           jQuery('s, br').remove() # remove the crossed out information
@@ -91,11 +94,11 @@ module.exports = (opts, done) ->
             obj.contact_name = util.trim jQuery(@).find('.cell-purch:nth-child(5)').text()
             obj.html_url = CONFIG.bid_link_prefix + jQuery(@).find('.cell-purch:nth-child(4) a').attr('href').substr(17)
             
-            details = require('request-sync')(
+            details = requestsync(
               method: 'GET'
               uri: obj.html_url
             )
-            $ = require('cheerio').load(details.body)
+            $ = cheerio.load(details.body)
             
             obj.description = util.trim $('b:contains("PROJECT DESCRIPTION")').next('span').text()
             obj.created_at = util.trim $('td:contains("Request for Proposal")').next('td').text()
@@ -124,11 +127,11 @@ module.exports = (opts, done) ->
             obj.contact_name = util.trim jQuery(@).find('.cell-purch:nth-child(6)').text()
             obj.html_url = CONFIG.bid_link_prefix + jQuery(@).find('a').attr('href').substr(17)
             
-            details = require('request-sync')(
+            details = requestsync(
               method: 'GET'
               uri: obj.html_url
             )
-            $ = require('cheerio').load(details.body)
+            $ = cheerio.load(details.body)
             
             obj.description = util.trim $('b:contains("PROJECT DESCRIPTION")').next('span').text()
             obj.created_at = util.trim $('td:contains("Request for Proposal")').next('td').text()
@@ -160,7 +163,7 @@ module.exports = (opts, done) ->
       jsdom.env
         html: body
         done: (errors, window) ->
-          jQuery = require('jquery')(window)
+          jQuery = jq(window)
           
           # Remove unnecessary bits
           jQuery('br').remove() # remove the crossed out information
@@ -176,11 +179,11 @@ module.exports = (opts, done) ->
             obj.department_name = util.trim jQuery(@).find('.cell-purch:nth-child(5)').text()
             obj.html_url = CONFIG.bid_link_prefix + jQuery(@).find('.cell-purch:nth-child(4) a').attr('href').substr(17)
             
-            details = require('request-sync')(
+            details = requestsync(
               method: 'GET'
               uri: obj.html_url
             )
-            $ = require('cheerio').load(details.body)
+            $ = cheerio.load(details.body)
             
             obj.description = util.trim $('h6:contains("PROJECT DESCRIPTION")').next('p').text()
             obj.contact_name = util.trim $('h6:contains("BUYER")').next('p').text()
